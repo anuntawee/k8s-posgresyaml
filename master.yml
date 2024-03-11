@@ -64,7 +64,7 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /nfs/home/data/database/pg-sql-01/master
+    path: /nfs/data/pg-sql-01/master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
