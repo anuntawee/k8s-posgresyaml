@@ -1,21 +1,20 @@
-# Slave
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-slave
-  namespace: postgres
+  name: postgres-master-02
+  namespace: postgres-02
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-slave
+      app: postgres-master-02
   template:
     metadata:
       labels:
-        app: postgres-slave
+        app: postgres-master-02
     spec:
       containers:
-        - name: postgres-slave
+        - name: postgres-master-02
           image: bitnami/postgresql:16
           imagePullPolicy: IfNotPresent
           resources:
@@ -24,22 +23,22 @@ spec:
           ports:
             - containerPort: 5432
           env:
-          - name: POSTGRESQL_PASSWORD
-            value: "postgres"
-          - name: POSTGRESQL_MASTER_HOST
-            value: "postgres-master-svc.postgres"
           - name: POSTGRESQL_PGAUDIT_LOG
-            value: "READ"
+            value: "READ,WRITE"
           - name: POSTGRESQL_LOG_HOSTNAME
             value: "true"
           - name: POSTGRESQL_REPLICATION_MODE
-            value: "slave"
+            value: "master"
           - name: POSTGRESQL_REPLICATION_USER
             value: "repl_user"
           - name: POSTGRESQL_REPLICATION_PASSWORD
             value: "repl_user"
-          - name: POSTGRESQL_MASTER_PORT_NUMBER
-            value: "5432"
+          - name: POSTGRESQL_USERNAME
+            value: "postgres"
+          - name: POSTGRESQL_PASSWORD
+            value: "postgres"
+          - name: POSTGRESQL_DATABASE
+            value: "development_database"
           - name: ALLOW_EMPTY_PASSWORD
             value: "yes"
           volumeMounts:
@@ -48,16 +47,16 @@ spec:
       volumes:
         - name: postgresdata
           persistentVolumeClaim:
-            claimName: postgres-slave-pvc
+            claimName: postgres-master-pvc-02
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: postgres-slave-pv
-  namespace: postgres
+  name: postgres-volume-02
+  namespace: postgres-02
   labels:
     type: local
-    app: postgres-slave
+    app: postgres-master
 spec:
   storageClassName: manual
   capacity:
@@ -65,15 +64,15 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /nfs/home/data/database/pg-sql-01/slave
+    path: /nfs/home/data/database/pg-sql-02/master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-slave-pvc
-  namespace: postgres
+  name: postgres-master-pvc-02
+  namespace: postgres-02
   labels:
-    app: postgres-slave
+    app: postgres-master-02
 spec:
   storageClassName: manual
   accessModes:
@@ -85,13 +84,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-slave-svc
-  namespace: postgres
+  name: postgres-master-svc-02
+  namespace: postgres-02
   labels:
-    app: postgres-slave
+    app: postgres-master-02
 spec:
   type: NodePort
   ports:
     - port: 5432
   selector:
-    app: postgres-slave
+    app: postgres-master-02
