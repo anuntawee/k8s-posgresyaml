@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-master
-  namespace: postgres
 spec:
   replicas: 1
   selector:
@@ -17,30 +16,27 @@ spec:
         - name: postgres-master
           image: bitnami/postgresql:16
           imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              memory: "2Gi"
           ports:
             - containerPort: 5432
           env:
-          - name: POSTGRESQL_PGAUDIT_LOG
-            value: "READ,WRITE"
-          - name: POSTGRESQL_LOG_HOSTNAME
-            value: "true"
-          - name: POSTGRESQL_REPLICATION_MODE
-            value: "master"
-          - name: POSTGRESQL_REPLICATION_USER
-            value: "repl_user"
-          - name: POSTGRESQL_REPLICATION_PASSWORD
-            value: "repl_user"
-          - name: POSTGRESQL_USERNAME
-            value: "postgres"
-          - name: POSTGRESQL_PASSWORD
-            value: "postgres"
-          - name: POSTGRESQL_DATABASE
-            value: "development_database"
-          - name: ALLOW_EMPTY_PASSWORD
-            value: "yes"
+            - name: POSTGRESQL_PGAUDIT_LOG
+              value: "READ,WRITE"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "true"
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: "master"
+            - name: POSTGRESQL_REPLICATION_USER
+              value: "repl_user"
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              value: "repl_user"
+            - name: POSTGRESQL_USERNAME
+              value: "postgres"
+            - name: POSTGRESQL_PASSWORD
+              value: "postgres"
+            - name: POSTGRESQL_DATABASE
+              value: "development_database"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
           volumeMounts:
             - mountPath: /bitnami/postgresql
               name: postgresdata
@@ -53,7 +49,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: postgres-volume
-  namespace: postgres
   labels:
     type: local
     app: postgres-master
@@ -70,7 +65,6 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-master-pvc
-  namespace: postgres
   labels:
     app: postgres-master
 spec:
@@ -85,7 +79,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-master-svc
-  namespace: postgres
   labels:
     app: postgres-master
 spec:
